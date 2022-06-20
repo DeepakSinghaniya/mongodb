@@ -1,12 +1,14 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
 
 const router = express.Router();
 const User = require("../models/user");
+const verifyToken = require("../middleware/auth");
 
 const saltRounds = 10;
 
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -22,7 +24,18 @@ router.post("/login", async (req, res) => {
 
   const match = await bcrypt.compare(req.body.password, user.password);
   if (match) {
-    res.send("Login");
+    const token = jwt.sign(
+      { name: user.name, id: user.id },
+      process.env.TokenSecret,
+      { expiresIn: "2h" }
+    );
+
+    res.json({
+      accessToken: token,
+      name: user.name,
+      id: user.id,
+      email: user.email,
+    });
   }
   res.send("Worang Password or username");
 });
@@ -42,7 +55,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, async (req, res) => {
   const user = await User.findById(req.params.id);
 
   try {

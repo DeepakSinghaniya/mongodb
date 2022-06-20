@@ -1,5 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const verifyToken = require("./middleware/auth");
+require("dotenv").config();
 
 const productRouter = require("./routers/products");
 const userRouter = require("./routers/users");
@@ -14,7 +16,7 @@ connectionObject.on("open", () => {
 });
 
 app.use(express.json());
-app.use("/products", productRouter);
+app.use("/products", verifyToken, productRouter);
 app.use("/users", userRouter);
 
 app.listen(2000, () => {
