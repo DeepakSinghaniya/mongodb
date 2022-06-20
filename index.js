@@ -1,21 +1,22 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
-const dbURL = "mongodb://localhost/productDB";
+const productRouter = require("./routers/products");
+const userRouter = require("./routers/users");
 
 const app = express();
+const dbURL = "mongodb://localhost/productDB";
 
 mongoose.connect(dbURL, { useNewUrlParser: true });
 const connectionObject = mongoose.connection;
-
 connectionObject.on("open", () => {
-  console.log("connected.......");
+  console.log("Database connected.......");
 });
 
 app.use(express.json());
-const productRouter = require("./routers/products");
 app.use("/products", productRouter);
+app.use("/users", userRouter);
 
 app.listen(2000, () => {
-  console.log("server running on 2000 port");
+  console.log("Server running on 2000 port");
 });
